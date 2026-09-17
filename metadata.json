@@ -1,0 +1,6 @@
+{
+  "name": "FMC TIMBANG BROILER",
+  "description": "Alat pencatatan dan perhitungan hasil penimbangan ayam broiler yang praktis, akurat, dan mudah digunakan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
