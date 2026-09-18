@@ -30,6 +30,7 @@ android {
       storePassword = System.getenv("STORE_PASSWORD")
       keyAlias = "upload"
       keyPassword = System.getenv("KEY_PASSWORD")
+      storeType = "JKS"
     }
     create("debugConfig") {
       storeFile = file("${rootDir}/debug.keystore")
