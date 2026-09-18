@@ -40,6 +40,29 @@ jobs:
         run: |
           echo "$KEYSTORE_BASE64" | base64 --decode > "$GITHUB_WORKSPACE/my-upload-key.jks"
 
+      - name: Validate release keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          test -n "$KEYSTORE_BASE64" || { echo "ERROR: KEYSTORE_BASE64 is empty"; exit 1; }
+          test -n "$STORE_PASSWORD" || { echo "ERROR: STORE_PASSWORD is empty"; exit 1; }
+          test -n "$KEY_PASSWORD" || { echo "ERROR: KEY_PASSWORD is empty"; exit 1; }
+
+          test -s "$GITHUB_WORKSPACE/my-upload-key.jks" || {
+            echo "ERROR: keystore file is empty"
+            exit 1
+          }
+
+          keytool -list             -keystore "$GITHUB_WORKSPACE/my-upload-key.jks"             -storetype JKS             -storepass "$STORE_PASSWORD"             -alias upload
+
+          keytool -certreq             -keystore "$GITHUB_WORKSPACE/my-upload-key.jks"             -storetype JKS             -storepass "$STORE_PASSWORD"             -keypass "$KEY_PASSWORD"             -alias upload             -file /tmp/fmc-timbang-upload.csr
+
+          rm -f /tmp/fmc-timbang-upload.csr
+
+          echo "PASS: release keystore, store password, key password, and alias upload are valid"
+
       - name: Create debug keystore
         run: |
           keytool -genkeypair -v \
