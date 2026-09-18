@@ -22,6 +22,8 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: ''
 
       - name: Install Android SDK packages
         run: |
@@ -56,6 +58,26 @@ jobs:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: gradle assembleRelease
+
+      - name: Verify APK identity
+        run: |
+          APK=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
+
+          echo "Checking APK: $APK"
+
+          PACKAGE=$(apkanalyzer manifest application-id "$APK")
+          echo "Application ID: $PACKAGE"
+
+          if [ "$PACKAGE" != "com.aistudio.timbangayam.kxqz" ]; then
+            echo "ERROR: Unexpected Application ID: $PACKAGE"
+            echo "Expected: com.aistudio.timbangayam.kxqz"
+            exit 1
+          fi
+
+          echo "PASS: APK belongs to FMC-Timbang-Broiler"
+
+          echo "Signing certificate:"
+          apksigner verify --print-certs "$APK"
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
